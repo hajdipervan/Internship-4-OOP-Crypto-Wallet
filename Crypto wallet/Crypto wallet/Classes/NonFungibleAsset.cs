@@ -14,12 +14,12 @@ namespace Crypto_wallet.Classes
         public Guid AddressFungibleAsset { get; }
 
 
-        public NonFungibleAsset(string name, double value, Guid addressFungibleAsset)
+        public NonFungibleAsset(string name, Guid addressFungibleAsset, double value)
         {
             Address = Guid.NewGuid();
             Name = name;
-            Value = value;
             AddressFungibleAsset = addressFungibleAsset;
+            Value = value;
 
         }
     }

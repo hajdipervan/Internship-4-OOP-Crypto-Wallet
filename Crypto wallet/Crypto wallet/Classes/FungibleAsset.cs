@@ -13,7 +13,6 @@ namespace Crypto_wallet.Classes
         public string ShortName { get; set; }
         public double ValueAgainstUSD{get; private set;}
 
-
         public FungibleAsset(string name,string shortName, double value)
         {
             Address= Guid.NewGuid();
@@ -29,6 +28,11 @@ namespace Crypto_wallet.Classes
             GuidString = GuidString.Replace("=", "");
             GuidString = GuidString.Replace("+", "");
             return GuidString; 
+        }
+        public double ReturnValue(Guid id)
+        {
+            if(id!=Address) return 0;
+            return ValueAgainstUSD;
         }
     }
 }

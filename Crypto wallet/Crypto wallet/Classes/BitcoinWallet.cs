@@ -9,9 +9,17 @@ namespace Crypto_wallet.Classes
 {
     public class BitcoinWallet : Wallet
     {
-        public List<string> AddressOfSupportedFungibleAssets { get; } = new List<string> { "Bitcoin", "Nesto", "Nesto" };
+        public List<Guid> AddressOfSupportedFungibleAssets { get; } = new List<Guid> {};
 
-        public BitcoinWallet() : base() {}
+        public BitcoinWallet(Dictionary<Guid, int> Balances, List<Guid> FAAddresses) : base(Balances)
+        {
+            AddressOfSupportedFungibleAssets = FAAddresses;
+        }
+        public void PrintWallets()
+        {
+            Console.WriteLine("");
+        }
+      
         
     }
 }
