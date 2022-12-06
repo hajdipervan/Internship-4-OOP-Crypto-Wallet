@@ -34,5 +34,6 @@ namespace Crypto_wallet.Classes
             if(id!=Address) return 0;
             return ValueAgainstUSD;
         }
+        
     }
 }

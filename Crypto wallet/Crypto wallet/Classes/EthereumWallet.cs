@@ -29,6 +29,24 @@ namespace Crypto_wallet.Classes
             }
             return base.ReturnBalanceOfFA(FAList, NFAList) + balance;
         }
+        public override void PrintAssets(List<FungibleAsset> FAList, List<NonFungibleAsset> NFAList)
+        {
+            foreach (var addressOfNFA in AddressesOfNonFungibleAssets)
+            {
+                var nfa = FindNFA(NFAList, addressOfNFA);
+                Console.WriteLine($"\nNon fungible asset: \nAddress: {nfa.Address} \nName: {nfa.Name} \nValue of NFA: {Math.Round(nfa.Value, 2)}$");
+            }
+            base.PrintAssets(FAList, NFAList);
+        }
+        public NonFungibleAsset FindNFA(List<NonFungibleAsset> NFAList, Guid address)
+        {
+            foreach (var nfa in NFAList)
+            {
+                if (nfa.Address == address)
+                    return nfa;
+            }
+            return null;
+        }
         public override void PrintWallet()
         {
             base.PrintWallet();

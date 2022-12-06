@@ -34,9 +34,8 @@ namespace Crypto_wallet.Classes
                 }
             return balance;
         }
-        public void HistoryBalancesPercentage(double value)
+        public void HistoryBalancesPercentage()
         {
-            ListHistoryBalances.Add(value);
             if (ListHistoryBalances.Count == 2)
             {
                 Console.WriteLine("Percegentage is 0%");
@@ -48,6 +47,14 @@ namespace Crypto_wallet.Classes
                 Console.WriteLine($"Percentage is {Math.Round( percentage/ListHistoryBalances[number - 2] * 100, 2)}%");
             }
         }
+        public bool IsWalletAddress(List<Wallet> wallets, string address)
+        {
+            foreach(var wallet in wallets)
+            {
+                if (wallet.Address.ToString() == address) return true;
+            }
+            return false;
+        }
         public virtual void PrintWallet()
         {
             Console.WriteLine(Address);
@@ -57,6 +64,25 @@ namespace Crypto_wallet.Classes
             }
             Console.WriteLine(ListOfAddressTransactions);
             
+        }
+        public virtual void PrintAssets(List<FungibleAsset> FAList, List<NonFungibleAsset> NFAList)
+        {
+            foreach (var bfa in BalanceFungibleAssets)
+            {
+                var fa = FindFA(FAList, bfa.Key);
+                Console.WriteLine($"\nFungible asset:\nAddress: {fa.Address} \nName: {fa.Name} \nShort name: {fa.ShortName} \nValue of FA: {Math.Round(fa.ValueAgainstUSD, 2)}$ \n" +
+                    $"Total value in USD: {BalanceFungibleAssets[bfa.Key]* fa.ValueAgainstUSD}$");
+            }
+            
+        }
+        public FungibleAsset FindFA(List<FungibleAsset> FAList, Guid address)
+        {
+            foreach (var fa in FAList)
+            {
+                if (fa.Address == address)
+                    return fa;
+            }
+            return null;
         }
     }
 }

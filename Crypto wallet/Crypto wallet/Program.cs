@@ -29,6 +29,19 @@ namespace Crypto_wallet
                     case "2":
                         Console.WriteLine("Wallet access is selected");
                         ShowWallets(Wallets, FungibleAssetsList, NonFungibleAssetsList);
+                        var choice2 = Answer("Insert wallet address for more options");
+                        switch(IsWalletAddress(Wallets, choice2))
+                        { 
+                           case true:
+                                //Console.WriteLine("ok");
+                                var searchWallet = FindWallet(choice2, Wallets);
+                                Console.WriteLine($"Total balance: {searchWallet.ReturnBalanceOfFA(FungibleAssetsList, NonFungibleAssetsList)}");
+                                searchWallet.PrintAssets(FungibleAssetsList, NonFungibleAssetsList);
+                                break;
+                           default:
+                                 //Console.WriteLine("Not ok");
+                                 break;
+                        }
                         break;
                     default:
                         Console.WriteLine("Wrong input");
@@ -92,9 +105,9 @@ namespace Crypto_wallet
             for (int i = 0; i < 3; i++)
                 wallets.Add(new BitcoinWallet(ReturnBalanceDictionary(FAList, i), ReturnSupportedFAAdressesList(FAList)));
             for (int i = 0; i < 3; i++)
-                wallets.Add(new EthereumWallet(ReturnBalanceDictionary(FAList, i), ReturnAddresesNFA(NFAList, i), ReturnSupportedFANFAAdressesList(NFAList, FAList)));
+                wallets.Add(new EthereumWallet(ReturnBalanceDictionary(FAList, i), ReturnAddresesNFA(NFAList, i, 0), ReturnSupportedFANFAAdressesList(NFAList, FAList)));
             for (int i = 0; i < 3; i++)
-                wallets.Add(new SolanaWallet(ReturnBalanceDictionary(FAList, i), ReturnAddresesNFA(NFAList, 9+i), ReturnSupportedFANFAAdressesList(NFAList, FAList)));
+                wallets.Add(new SolanaWallet(ReturnBalanceDictionary(FAList, i), ReturnAddresesNFA(NFAList, i, 9), ReturnSupportedFANFAAdressesList(NFAList, FAList)));
             return wallets;
 
         }
@@ -107,6 +120,8 @@ namespace Crypto_wallet
                 { FAList[i*3+1].Address, r.Next(1,11) },
                 { FAList[i*3+2].Address, r.Next(1,11)}
             };
+            if (i == 2)
+                balances.Add(FAList[9].Address, r.Next(1, 11));
             return balances;
         }
         static List<Guid> ReturnSupportedFAAdressesList(List<FungibleAsset> FAList)
@@ -118,13 +133,19 @@ namespace Crypto_wallet
             }
             return FAGuides;
         }
-        static List<Guid> ReturnAddresesNFA(List<NonFungibleAsset> NFAList, int i)
+        static List<Guid> ReturnAddresesNFA(List<NonFungibleAsset> NFAList, int i, int z)
         {
             var NFAAddreses = new List<Guid>();
-            for(int j = 0; j < 3; j++)
+            for (int j = 0; j < 3; j++)
             {
-                NFAAddreses.Add(NFAList[i + j].Address);
+                NFAAddreses.Add(NFAList[i *3+ j+z].Address);
             }
+            if (i == 2)
+                if (z == 0)
+                    NFAAddreses.Add(NFAList[18].Address);
+                else
+                    NFAAddreses.Add(NFAList[19].Address);
+            
             return NFAAddreses;
         }
         static List<Guid> ReturnSupportedFANFAAdressesList(List<NonFungibleAsset> NFAList, List<FungibleAsset> FAList)
@@ -187,7 +208,7 @@ namespace Crypto_wallet
                         }
                     case "3":
                         {
-                            question = Answer("Solana wallet creation selected \nAre you sure you want to create new Ethereum crypto wallet? y/n");
+                            question = Answer("Solana wallet creation selected \nAre you sure you want to create new Solana crypto wallet? y/n");
                             switch (question)
                             {
                                 case "y":
@@ -216,29 +237,33 @@ namespace Crypto_wallet
         {
             foreach(var wallet in wallets)
             {
+                string name;
+                var balance = Math.Round(wallet.ReturnBalanceOfFA(FAList, NFAList), 2);
                 if (wallet is BitcoinWallet)
-                {
-                    var balance = wallet.ReturnBalanceOfFA(FAList, NFAList);
-                    Console.WriteLine($"Bitcoin wallet \nAddress: {wallet.Address} \nTotal balance: {balance}$ ");
-                    wallet.HistoryBalancesPercentage(balance);
-                    
-
-                }
+                    name = "Bitcoin";
                 else if (wallet is EthereumWallet)
-                {
-                    var balance = wallet.ReturnBalanceOfFA(FAList, NFAList);
-                    Console.WriteLine($"Ethereum wallet \nAddress: {wallet.Address} \nTotal balance: {balance}$ ");
-                    wallet.HistoryBalancesPercentage(balance);
-                }
+                    name = "Ethereum";
                 else
-                {
-                    var balance = wallet.ReturnBalanceOfFA(FAList, NFAList);
-                    Console.WriteLine($"Solana wallet \nAddress: {wallet.Address} \nTotal balance: {Math.Round(balance, 2)}$ ");
-                    wallet.HistoryBalancesPercentage(balance);
-
-                }
-
+                    name = "Solana";
+                Console.WriteLine($"\n{name} wallet \nAddress: {wallet.Address} \nTotal balance: {balance,2}$ ");
+                wallet.ListHistoryBalances.Add(balance);
+                wallet.HistoryBalancesPercentage();
             }
         }
+        static bool IsWalletAddress(List<Wallet> wallets, string address)
+        {
+            foreach (var wallet in wallets)
+            {
+                if (wallet.Address.ToString() == address) return true;
+            }
+            return false;
+        }
+        static Wallet FindWallet(string address, List<Wallet> wallets)
+        {
+            foreach (var wallet in wallets)
+                if (wallet.Address.ToString() == address) return wallet;
+            return null;
+        }
+        
     }
 }
