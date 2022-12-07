@@ -37,12 +37,11 @@ namespace Crypto_wallet.Classes
             }
             receiverWallet.DeletingNFA(AddressOfAsset);
             Revoked = true;
-            
             return true;
         }
-        public virtual void TransactionFARevoked(List<Wallet> wallets, Wallet senterWallet, FungibleAsset fa)
+        public virtual bool TransactionFARevoked(List<Wallet> wallets, Wallet senterWallet, FungibleAsset fa)
         {
-            Revoked = true;
+            return true;
         }
     }
 }

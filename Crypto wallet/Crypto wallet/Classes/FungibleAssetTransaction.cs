@@ -28,7 +28,7 @@ namespace Crypto_wallet.Classes
             double amountOfFA = (SenterStartBalanceWallet - SenterEndBalanceWallet) / FA.ValueAgainstUSD;
             Console.WriteLine($"Amount: {Math.Round(amountOfFA, 1)} \nName of fungible asset: {FA.Name}");
         }
-        public override void TransactionFARevoked(List<Wallet> wallets, Wallet senterWallet, FungibleAsset fa )
+        public override bool TransactionFARevoked(List<Wallet> wallets, Wallet senterWallet, FungibleAsset fa )
         {
             Wallet receiverWallet = null;
             double amountOfFA = Math.Round((SenterStartBalanceWallet - SenterEndBalanceWallet) / fa.ValueAgainstUSD, 1);
@@ -44,10 +44,11 @@ namespace Crypto_wallet.Classes
                 // povecaj amount
                 senterWallet.BalanceFungibleAssets[AddressOfAsset] = senterWallet.BalanceFungibleAssets[AddressOfAsset]+(int)amountOfFA;
                 receiverWallet.BalanceFungibleAssets[AddressOfAsset] = receiverWallet.BalanceFungibleAssets[AddressOfAsset] - (int)amountOfFA;
+                return true;
             }
             senterWallet.BalanceFungibleAssets.Add(AddressOfAsset,(int)amountOfFA );
             receiverWallet.BalanceFungibleAssets[AddressOfAsset]= receiverWallet.BalanceFungibleAssets[AddressOfAsset] - (int)amountOfFA;
-
+            return true;
         }
 
     }

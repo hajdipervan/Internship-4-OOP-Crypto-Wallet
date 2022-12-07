@@ -10,8 +10,6 @@ namespace Crypto_wallet.Classes
     {
         public List<Guid> AddressesOfNonFungibleAssets { get; set; }
         public List<Guid> AddressesOfSupportedFungAndNonFungAssets { get; }
-
-
         public EthereumWallet(Dictionary<Guid, int> Balances, List<Guid> NFAAddresses, List<Guid> SupportedFANFAList) : base(Balances)
         {
             AddressesOfNonFungibleAssets = NFAAddresses;

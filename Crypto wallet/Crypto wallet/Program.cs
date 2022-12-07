@@ -1,17 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO.Pipes;
-using System.Linq;
-using System.Net;
-using System.Net.Http.Headers;
-using System.Reflection.Metadata.Ecma335;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
-using System.Transactions;
-using System.Xml.Linq;
-using System.Xml.Serialization;
-using Crypto_wallet.Classes;
+﻿using Crypto_wallet.Classes;
 namespace Crypto_wallet
 {
     class Program
@@ -22,10 +9,6 @@ namespace Crypto_wallet
             var NonFungibleAssetsList=LoadNonFungibleAssets(FungibleAssetsList);
             var Wallets = LoadWallets(FungibleAssetsList, NonFungibleAssetsList);
             var TransactionList = new List<Transactions>();
-            foreach(var fa in FungibleAssetsList)
-            {
-                Console.WriteLine(fa.Address);
-            }
 
             string choice;
             do
@@ -34,10 +17,12 @@ namespace Crypto_wallet
                 switch (choice)
                 {
                     case "1":
+                        Console.Clear();
                         Console.WriteLine("Wallet creation selected");
                         Wallets=CreateWallet(Wallets, FungibleAssetsList, NonFungibleAssetsList);
                         break;
                     case "2":
+                        Console.Clear();
                         Console.WriteLine("Wallet access is selected");
                         ShowWallets(Wallets, FungibleAssetsList, NonFungibleAssetsList);
                         var choice2 = Answer("Insert wallet address for more options");
@@ -66,8 +51,12 @@ namespace Crypto_wallet
                                             break;
                                         case "3":
                                             searchWallet = FindWallet(choice2, Wallets);
-                                            LoadTransactions(TransactionList, FungibleAssetsList, NonFungibleAssetsList);
-                                            if (TransactionList.Count == 0) break;
+                                            LoadTransactions(TransactionList, searchWallet, FungibleAssetsList, NonFungibleAssetsList);
+                                            if (TransactionList.Count == 0)
+                                            {
+                                                Console.WriteLine("There is no transactions in this wallet");
+                                                break;
+                                            }
                                             string answerForRevoke = Answer("Do you want to revoke the transaction? y/n");
                                             if (answerForRevoke == "y")
                                             {
@@ -81,6 +70,7 @@ namespace Crypto_wallet
                                             }
                                             break;
                                         case "4":
+                                            Console.Clear();
                                             Console.WriteLine("Back on main selected");
                                             choice22 = "5";
                                             break;
@@ -96,6 +86,7 @@ namespace Crypto_wallet
                         }
                         break;
                     default:
+                        Console.Clear();
                         Console.WriteLine("Wrong input");
                         break;
                 }
@@ -153,7 +144,6 @@ namespace Crypto_wallet
         static List<Wallet> LoadWallets(List<FungibleAsset> FAList, List<NonFungibleAsset> NFAList)
         {
             var wallets = new List<Wallet>();
-            //kreirajmo 3 bitcoin walleta
             for (int i = 0; i < 3; i++)
                 wallets.Add(new BitcoinWallet(ReturnBalanceDictionary(FAList, i), ReturnSupportedFAAdressesList(FAList)));
             for (int i = 0; i < 3; i++)
@@ -270,15 +260,18 @@ namespace Crypto_wallet
                                     Console.WriteLine("Successfully created");
                                     return wallets;
                                 case "n":
+                                    Console.Clear();
                                     Console.WriteLine("You have given up on entering a new wallet");
                                     return wallets;
                                 default:
+                                    Console.Clear();
                                     Console.WriteLine("Wrong input");
                                     break;
                             }
                             break;
                         }
                     default:
+                        Console.Clear();
                         Console.WriteLine("Wrong input");
                         break;
                 }
@@ -348,7 +341,6 @@ namespace Crypto_wallet
             }
             if (SenterWallet.FindFA(FAList, assetId) != null)
             {
-
                 int amount = CheckIsInteger();
                 if (amount == 0)
                 {
@@ -368,16 +360,20 @@ namespace Crypto_wallet
                     Console.WriteLine("You have canceled the transaction");
                     return false;
                 }
+
                 var balanceSenterStart = SenterWallet.ReturnBalanceOfFA(FAList, NFAList);
                 int newValueSenter = SenterWallet.BalanceFungibleAssets[AssetIdGuid] - amount;
                 SenterWallet.BalanceFungibleAssets[AssetIdGuid] = newValueSenter;
                 var balanceReceiverStart = ReceiverWallet.ReturnBalanceOfFA(FAList, NFAList);
+
                 if (ReceiverWallet.ContainsId(AssetIdGuid))
                 {
                     int newValueReceiver = ReceiverWallet.BalanceFungibleAssets[AssetIdGuid] + amount;
                     ReceiverWallet.BalanceFungibleAssets[AssetIdGuid] = newValueReceiver;
+
                     var balanceSenterEnd = SenterWallet.ReturnBalanceOfFA(FAList, NFAList);
                     var balanceReceiverEnd = SenterWallet.ReturnBalanceOfFA(FAList, NFAList);
+
                     FungibleAssetTransaction FATransaction1 = new FungibleAssetTransaction(AssetIdGuid, SenterWallet.Address, ReceiverWallet.Address, balanceSenterStart, balanceReceiverStart, balanceSenterEnd, balanceReceiverEnd);
                     SenterWallet.ListOfAddressTransactions.Add(FATransaction1.Id);
                     ReceiverWallet.ListOfAddressTransactions.Add(FATransaction1.Id);
@@ -385,61 +381,54 @@ namespace Crypto_wallet
                     return true;
                 }
                 ReceiverWallet.BalanceFungibleAssets.Add(AssetIdGuid, amount);
+
                 var balanceSenterEnd1 = SenterWallet.ReturnBalanceOfFA(FAList, NFAList);
                 var balanceReceiverEnd1 = SenterWallet.ReturnBalanceOfFA(FAList, NFAList);
+
                 FungibleAssetTransaction FATransaction = new FungibleAssetTransaction(AssetIdGuid, SenterWallet.Address, ReceiverWallet.Address, balanceSenterStart, balanceReceiverStart, balanceSenterEnd1, balanceReceiverEnd1);
                 SenterWallet.ListOfAddressTransactions.Add(FATransaction.Id);
                 ReceiverWallet.ListOfAddressTransactions.Add(FATransaction.Id);
                 transactions.Add(FATransaction);
+
                 return true;
             }
-            // smatramo da je nfa
             if (ReceiverWallet is EthereumWallet || ReceiverWallet is SolanaWallet)
             {
                 Guid NFAIdGuid;
                 Guid.TryParse(assetId, out NFAIdGuid);
                 NonFungibleAsset NFAForTransaction = ReturnNFA(NFAList, NFAIdGuid);
+
                 SenterWallet.DeletingNFA(NFAIdGuid);
                 ReceiverWallet.AddingNFAInList(NFAForTransaction);
+
                 NonFungibleAssetTransaction NFATransaction = new NonFungibleAssetTransaction(NFAIdGuid, SenterWallet.Address, ReceiverWallet.Address);
                 transactions.Add(NFATransaction);
                 SenterWallet.ListOfAddressTransactions.Add(NFATransaction.Id);
                 ReceiverWallet.ListOfAddressTransactions.Add(NFATransaction.Id);
                 FungibleAsset FAForChanging = ReturnFA(FAList, NFAForTransaction.AddressFungibleAsset);
                 FAForChanging.ChangeValue();
+
                 return true;
             }
             Console.WriteLine("Transaction is not possible (Type of wallet cannot receive non fungible assets)");
             return false;
 
         }
-        static bool ContainsAddressForFA(List<FungibleAsset> FAList, string assetId)
-        {
-            foreach(var fa in FAList)
-            {
-                if (fa.Address.ToString() == assetId)
-                    return true;
-            }
-            return false;
-        }
         static NonFungibleAsset ReturnNFA(List<NonFungibleAsset> NFAList, Guid address)
         {
             foreach(var nfa in NFAList)
-            {
                 if(nfa.Address==address) return nfa;
-            }
             return null;
         }
         static FungibleAsset ReturnFA(List<FungibleAsset> FAList, Guid address)
         {
             foreach (var fa in FAList)
-            {
                 if (fa.Address == address) return fa;
-            }
             return null;
         }
-        static bool LoadTransactions(List<Transactions> transactions, List<FungibleAsset> FAList, List<NonFungibleAsset> NFAList)
+        static bool LoadTransactions(List<Transactions> TransactionsList,Wallet searchWallet, List<FungibleAsset> FAList, List<NonFungibleAsset> NFAList)
         {
+            List<Transactions> transactions = ReturnWalletTransactions(searchWallet.ListOfAddressTransactions, TransactionsList);
             List<Transactions> ReverseList = ReturnReverseListTransaction(transactions);
             foreach (var t in ReverseList)
             {
@@ -457,6 +446,18 @@ namespace Crypto_wallet
                 Console.WriteLine($"Is revoked: {t.Revoked}");
             }
             return true ;
+        }
+        static List<Transactions> ReturnWalletTransactions(List<Guid> TransactionsAddresses, List<Transactions> transactions)
+        {
+            List<Transactions> TransactionList = new List<Transactions>();
+            foreach(var t in transactions)
+            {
+                if (TransactionsAddresses.Contains(t.Id))
+                {
+                    TransactionList.Add(t);
+                }
+            }
+            return TransactionList;
         }
         static int CheckIsInteger()
         {
@@ -494,24 +495,29 @@ namespace Crypto_wallet
                 Console.WriteLine("You dont have permission for revoking this transaction");
                 return false;
             }
-            //if ((DateTime.Now- tr.Date) > 45)
+            if (tr.Revoked == true)
+            {
+                Console.WriteLine("Transaction is already revoked");
+                return false;
+            }
+            if (DateTime.Now.Subtract(tr.Date).TotalSeconds > 45)
+            {
+                Console.WriteLine("Passed more than 45 seconds from transaction. You can not revoke transaction");
+                return false;
+            }
             if(tr is NonFungibleAssetTransaction)
             {
                 tr.TransactionNFARevoked(wallets, SenterWallet, ReturnNFA(NFAList, tr.AddressOfAsset));
                 return true;
             }
-            tr.TransactionFARevoked(wallets, SenterWallet, ReturnFA(FAList, tr.AddressOfAsset));
-            return true; 
+            tr.Revoked = true;
+            return tr.TransactionFARevoked(wallets, SenterWallet, ReturnFA(FAList, tr.AddressOfAsset));
         }
         static Transactions CheckIsTransaction(List<Transactions> transactions, string id)
         {
             foreach (var t in transactions)
-            {
                 if (t.Id.ToString() == id)
-                {
                     return t;
-                }
-            }
             Console.WriteLine("There si no transaction with inserted ID");
             return null;
         }

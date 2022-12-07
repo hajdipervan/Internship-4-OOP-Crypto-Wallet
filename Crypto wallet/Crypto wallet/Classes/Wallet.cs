@@ -113,6 +113,5 @@ namespace Crypto_wallet.Classes
             }
             return false;
         }
-
     }
 }
