@@ -23,7 +23,7 @@ namespace Crypto_wallet.Classes
             ReceiversWalletAdress = receiversWalletAdress;
             Revoked= false;
         }
-        public virtual void PrintFA()
+        public virtual void PrintFA(FungibleAsset FA)
         {
 
         }

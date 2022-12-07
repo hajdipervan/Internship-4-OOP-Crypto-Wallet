@@ -15,10 +15,6 @@ namespace Crypto_wallet.Classes
         {
             AddressOfSupportedFungibleAssets = FAAddresses;
         }
-        public void PrintWallets()
-        {
-            Console.WriteLine("");
-        }
       
         
     }

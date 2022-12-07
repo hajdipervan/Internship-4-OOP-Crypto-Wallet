@@ -22,11 +22,11 @@ namespace Crypto_wallet.Classes
             SenterEndBalanceWallet = senterEndBalanceWallet;
             ReceiverEndBalanceWallet = receiverEndBalanceWallet;
         }
-        public override void PrintFA()
+        public override void PrintFA(FungibleAsset FA)
         {
-            base.PrintFA();
-            Console.WriteLine($"Start balance of senter wallet: {SenterStartBalanceWallet}\n End balance of senter wallet: {SenterEndBalanceWallet}" +
-                $"\nStart balance of receiver wallet: {ReceiverStartBalanceWallet}\n End balance of senter wallet: {ReceiverEndBalanceWallet}");
+            //base.PrintFA(FA);
+            double amountOfFA = (SenterStartBalanceWallet - SenterEndBalanceWallet) / FA.ValueAgainstUSD;
+            Console.WriteLine($"Amount: {Math.Round(amountOfFA, 1)} \nName of fungible asset: {FA.Name}");
         }
 
     }

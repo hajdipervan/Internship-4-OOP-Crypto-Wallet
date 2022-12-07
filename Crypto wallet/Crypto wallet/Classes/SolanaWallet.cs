@@ -18,7 +18,15 @@ namespace Crypto_wallet.Classes
         }
         public override double ReturnBalanceOfFA(List<FungibleAsset> FAList, List<NonFungibleAsset> NFAList)
         {
-            return base.ReturnBalanceOfFA(FAList, NFAList);
+            double balance = 0;
+            foreach (var nfa in NFAList)
+            {
+                if (AddressesOfNonFungibleAssets.Contains(nfa.Address))
+                {
+                    balance = balance + nfa.Value;
+                }
+            }
+            return base.ReturnBalanceOfFA(FAList, NFAList) + balance;
         }
         public override void PrintAssets(List<FungibleAsset> FAList, List<NonFungibleAsset> NFAList)
         {

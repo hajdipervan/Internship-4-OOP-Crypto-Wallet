@@ -20,7 +20,7 @@ namespace Crypto_wallet
             var NonFungibleAssetsList=LoadNonFungibleAssets(FungibleAssetsList);
             var Wallets = LoadWallets(FungibleAssetsList, NonFungibleAssetsList);
             var TransactionList = new List<Transaction>();
-
+            
 
             string choice;
             do
@@ -43,6 +43,10 @@ namespace Crypto_wallet
                                 do
                                 {
                                     choice22 = Answer("1 - Portfolio \n2 - Transfer \n3 - History of transaction \n4 - Back on main menu");
+                                    foreach (var wallet in Wallets)
+                                    {
+                                        wallet.PrintWallet();
+                                    }
                                     switch (choice22)
                                     {
                                         case "1":
@@ -60,7 +64,7 @@ namespace Crypto_wallet
                                             Console.WriteLine("Transaction  is not completed");
                                             break;
                                         case "3":
-                                            LoadTransactions(TransactionList);
+                                            LoadTransactions(TransactionList, FungibleAssetsList, NonFungibleAssetsList);
                                             break;
                                         case "4":
                                             Console.WriteLine("Back on main selected");
@@ -328,51 +332,54 @@ namespace Crypto_wallet
                 Console.WriteLine("Wallet senter does not contain inserted asset");
                 return false;
             }
-            if(SenterWallet.FindFA(FAList, assetId) != null)
+            if (SenterWallet.FindFA(FAList, assetId) != null)
             {
-                //smatramo da je fa, triba pitat kolicinu
-            
-                try
+
+                int amount = CheckIsInteger();
+                if (amount == 0)
                 {
-                    int amount = int.Parse(Answer("Insert amount of FA for sending"));
-                    Guid AssetIdGuid;
-                    Guid.TryParse(assetId, out AssetIdGuid);
-                    if (SenterWallet.BalanceFungibleAssets[AssetIdGuid] < amount)
-                    {
-                        Console.WriteLine("It is not possible to finish the transfer (There is not enough funds) ");
-                        return false;
-                    }
-                    var agree = Answer("Are you sure you want to make the transaction? y/n");
-                    if (agree != "y")
-                    {
-                        Console.WriteLine("You have canceled the transaction");
-                        return false;
-                    }
-                    var balanceSenterStart = SenterWallet.ReturnBalanceOfFA(FAList, NFAList);
-                    int newValueSenter = SenterWallet.BalanceFungibleAssets[AssetIdGuid] - amount;
-                    SenterWallet.BalanceFungibleAssets[AssetIdGuid] = newValueSenter;
-                    var balanceReceiverStart = ReceiverWallet.ReturnBalanceOfFA(FAList, NFAList);
-                    if (ReceiverWallet.BalanceFungibleAssets.ContainsKey(AssetIdGuid))
-                    {
-                        int newValueReceiver = ReceiverWallet.BalanceFungibleAssets[AssetIdGuid] + amount;
-                        ReceiverWallet.BalanceFungibleAssets[AssetIdGuid]= newValueReceiver;
-                    }
-                    ReceiverWallet.BalanceFungibleAssets.Add(AssetIdGuid, amount);
+                    Console.WriteLine("You didn't insert integer or you inserted 0");
+                    return false;
+                }
+                Guid AssetIdGuid;
+                Guid.TryParse(assetId, out AssetIdGuid);
+                if (SenterWallet.BalanceFungibleAssets[AssetIdGuid] < amount)
+                {
+                    Console.WriteLine("It is not possible to finish the transfer (There is not enough funds) ");
+                    return false;
+                }
+                string agree = Answer("Are you sure you want to make the transaction? y/n");
+                if (agree != "y")
+                {
+                    Console.WriteLine("You have canceled the transaction");
+                    return false;
+                }
+                var balanceSenterStart = SenterWallet.ReturnBalanceOfFA(FAList, NFAList);
+                int newValueSenter = SenterWallet.BalanceFungibleAssets[AssetIdGuid] - amount;
+                SenterWallet.BalanceFungibleAssets[AssetIdGuid] = newValueSenter;
+                var balanceReceiverStart = ReceiverWallet.ReturnBalanceOfFA(FAList, NFAList);
+                if (ReceiverWallet.ContainsId(AssetIdGuid))
+                {
+                    int newValueReceiver = ReceiverWallet.BalanceFungibleAssets[AssetIdGuid] + amount;
+                    ReceiverWallet.BalanceFungibleAssets[AssetIdGuid] = newValueReceiver;
                     var balanceSenterEnd = SenterWallet.ReturnBalanceOfFA(FAList, NFAList);
                     var balanceReceiverEnd = SenterWallet.ReturnBalanceOfFA(FAList, NFAList);
-                    FungibleAssetTransaction FATransaction = new FungibleAssetTransaction(AssetIdGuid, SenterWallet.Address, ReceiverWallet.Address, balanceSenterStart, balanceReceiverStart, balanceSenterEnd, balanceReceiverEnd);
-                    SenterWallet.ListOfAddressTransactions.Add(FATransaction.Id);
-                    ReceiverWallet.ListOfAddressTransactions.Add(FATransaction.Id);
-                    Transactions.Add(FATransaction);
+                    FungibleAssetTransaction FATransaction1 = new FungibleAssetTransaction(AssetIdGuid, SenterWallet.Address, ReceiverWallet.Address, balanceSenterStart, balanceReceiverStart, balanceSenterEnd, balanceReceiverEnd);
+                    SenterWallet.ListOfAddressTransactions.Add(FATransaction1.Id);
+                    ReceiverWallet.ListOfAddressTransactions.Add(FATransaction1.Id);
+                    Transactions.Add(FATransaction1);
                     return true;
                 }
-                catch
-                {
-                    Console.WriteLine("You did not insert integer");
-                    return false ;
-                }
-
+                ReceiverWallet.BalanceFungibleAssets.Add(AssetIdGuid, amount);
+                var balanceSenterEnd1 = SenterWallet.ReturnBalanceOfFA(FAList, NFAList);
+                var balanceReceiverEnd1 = SenterWallet.ReturnBalanceOfFA(FAList, NFAList);
+                FungibleAssetTransaction FATransaction = new FungibleAssetTransaction(AssetIdGuid, SenterWallet.Address, ReceiverWallet.Address, balanceSenterStart, balanceReceiverStart, balanceSenterEnd1, balanceReceiverEnd1);
+                SenterWallet.ListOfAddressTransactions.Add(FATransaction.Id);
+                ReceiverWallet.ListOfAddressTransactions.Add(FATransaction.Id);
+                Transactions.Add(FATransaction);
+                return true;
             }
+            
             // smatramo da je nfa
             if (ReceiverWallet is EthereumWallet || ReceiverWallet is SolanaWallet)
             {
@@ -387,6 +394,7 @@ namespace Crypto_wallet
                 ReceiverWallet.ListOfAddressTransactions.Add(NFATransaction.Id);
                 FungibleAsset FAForChanging = ReturnFA(FAList, NFAForTransaction.AddressFungibleAsset);
                 FAForChanging.ChangeValue();
+                return true;
             }
             Console.WriteLine("Transaction is not possible (Type of wallet cannot receive non fungible assets)");
             return false;
@@ -417,22 +425,46 @@ namespace Crypto_wallet
             }
             return null;
         }
-        static void LoadTransactions(List<Transaction> Transactions)
+        static bool LoadTransactions(List<Transaction> Transactions, List<FungibleAsset> FAList, List<NonFungibleAsset> NFAList)
         {
-            Transactions.Reverse();
-            foreach (var t in Transactions)
+            List<Transaction> ReverseList = ReturnReverseListTransaction(Transactions);
+            foreach (var t in ReverseList)
             {
                 Console.WriteLine($"\nTransaction id: {t.Id} \nDate and time of transaction: {t.Date} \nAddress of senter wallet: {t.SentersWalletAdress} \n" +
-                    $"Address of receiver wallet: {t.ReceiversWalletAdress} \n");
+                    $"Address of receiver wallet: {t.ReceiversWalletAdress}");
                 if(t is FungibleAssetTransaction)
                 {
-                    t.PrintFA();
+                    FungibleAsset FA = ReturnFA(FAList, t.AddressOfAsset);
+                    t.PrintFA(FA);
                     Console.WriteLine($"Is revoked: {t.Revoked}");
+                    return true;
                 }
-                //dovrsi 
+                NonFungibleAsset NFA = ReturnNFA(NFAList, t.AddressOfAsset);
+                Console.WriteLine($"Name of nonfungible asset: {NFA.Name}");
+                Console.WriteLine($"Is revoked: {t.Revoked}");
+            }
+            return true ;
+        }
+        static int CheckIsInteger()
+        {
+            try
+            {
+                int amount = int.Parse(Answer("Insert amount of FA for sending"));
+                return amount;
+            }
+            catch
+            {
+                return 0; 
             }
         }
-
-
+        static List<Transaction> ReturnReverseListTransaction(List<Transaction> transactions)
+        {
+            var transactionsReverseList = new List<Transaction>();
+            for(int i = transactions.Count()-1; i > -1; i--)
+            {
+                transactionsReverseList.Add(transactions[i]);
+            }
+            return transactionsReverseList;
+        }
     }
 }

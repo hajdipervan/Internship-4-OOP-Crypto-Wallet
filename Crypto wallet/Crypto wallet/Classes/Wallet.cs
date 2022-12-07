@@ -62,7 +62,6 @@ namespace Crypto_wallet.Classes
             {
                 Console.WriteLine(bal.Value);
             }
-            Console.WriteLine(ListOfAddressTransactions);
             
         }
         public virtual void PrintAssets(List<FungibleAsset> FAList, List<NonFungibleAsset> NFAList)
@@ -71,7 +70,7 @@ namespace Crypto_wallet.Classes
             {
                 var fa = FindFA(FAList, bfa.Key.ToString());
                 Console.WriteLine($"\nFungible asset:\nAddress: {fa.Address} \nName: {fa.Name} \nShort name: {fa.ShortName} \nValue of FA: {Math.Round(fa.ValueAgainstUSD, 2)}$ \n" +
-                    $"Total value in USD: {BalanceFungibleAssets[bfa.Key]* fa.ValueAgainstUSD}$");
+                    $"Total value in USD: {BalanceFungibleAssets[bfa.Key]* fa.ValueAgainstUSD}$ \nAmount: {bfa.Value}");
             }
             
         }
@@ -98,9 +97,15 @@ namespace Crypto_wallet.Classes
         {
             return false;
         }
-        public virtual void AddingNFAInList(NonFungibleAsset NFA)
+        public virtual void AddingNFAInList(NonFungibleAsset NFA){}
+        public bool ContainsId(Guid address)
         {
-            
+            foreach (var a in BalanceFungibleAssets)
+            {
+                if (a.Key == address)
+                    return true;
+            }
+            return false;
         }
 
     }

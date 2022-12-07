@@ -42,5 +42,6 @@ namespace Crypto_wallet.Classes
             ValueAgainstUSD = ValueAgainstUSD + (percentage / 100 * ValueAgainstUSD);
             return 0;
         }
+        
     }
 }
