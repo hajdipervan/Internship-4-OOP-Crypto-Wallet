@@ -33,16 +33,16 @@ namespace Crypto_wallet.Classes
         {
             foreach (var addressOfNFA in AddressesOfNonFungibleAssets)
             {
-                var nfa = FindNFA(NFAList, addressOfNFA);
+                var nfa = FindNFA(NFAList, addressOfNFA.ToString());
                 Console.WriteLine($"\nNon fungible asset: \nAddress: {nfa.Address} \nName: {nfa.Name} \nValue of NFA: {Math.Round(nfa.Value, 2)}$");
             }
             base.PrintAssets(FAList, NFAList);
         }
-        public NonFungibleAsset FindNFA(List<NonFungibleAsset> NFAList, Guid address)
+        public NonFungibleAsset FindNFA(List<NonFungibleAsset> NFAList, string address)
         {
             foreach (var nfa in NFAList)
             {
-                if (nfa.Address == address)
+                if (nfa.Address.ToString() == address)
                     return nfa;
             }
             return null;
@@ -54,6 +54,29 @@ namespace Crypto_wallet.Classes
             {
                 Console.WriteLine(guid);
             }
+        }
+        public override bool ContainsNFA(string assetId)
+        {
+            foreach (var addressNFA in AddressesOfNonFungibleAssets)
+                if (addressNFA.ToString() == assetId)
+                    return true;
+            return base.ContainsNFA(assetId);
+        }
+        public override bool DeletingNFA(Guid addressNFA)
+        {
+            foreach(var address in AddressesOfNonFungibleAssets)
+            {
+                if (address == addressNFA)
+                {
+                    AddressesOfNonFungibleAssets.Remove(address);
+                    return true;
+                }
+            }
+           return false;
+        }
+        public override void AddingNFAInList(NonFungibleAsset NFA)
+        {
+            AddressesOfNonFungibleAssets.Add(NFA.Address);
         }
     }
 }

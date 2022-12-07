@@ -11,8 +11,8 @@ namespace Crypto_wallet.Classes
     public class Wallet
     {
         public Guid Address { get; }
-        public Dictionary<Guid, int> BalanceFungibleAssets { get; }
-        public List<Guid> ListOfAddressTransactions { get; }
+        public Dictionary<Guid, int> BalanceFungibleAssets { get; set; }
+        public List<Guid> ListOfAddressTransactions { get; set; }
         public List<double> ListHistoryBalances { get; set; }
         public Wallet(Dictionary<Guid, int> Balances)
         {
@@ -69,20 +69,39 @@ namespace Crypto_wallet.Classes
         {
             foreach (var bfa in BalanceFungibleAssets)
             {
-                var fa = FindFA(FAList, bfa.Key);
+                var fa = FindFA(FAList, bfa.Key.ToString());
                 Console.WriteLine($"\nFungible asset:\nAddress: {fa.Address} \nName: {fa.Name} \nShort name: {fa.ShortName} \nValue of FA: {Math.Round(fa.ValueAgainstUSD, 2)}$ \n" +
                     $"Total value in USD: {BalanceFungibleAssets[bfa.Key]* fa.ValueAgainstUSD}$");
             }
             
         }
-        public FungibleAsset FindFA(List<FungibleAsset> FAList, Guid address)
+        public FungibleAsset FindFA(List<FungibleAsset> FAList, string address)
         {
             foreach (var fa in FAList)
             {
-                if (fa.Address == address)
+                if (fa.Address.ToString() == address)
                     return fa;
             }
             return null;
         }
+        public virtual bool ContainsNFA(string assetId)
+        {
+            return false;
+        }
+        public Guid AddTransaction()
+        {
+            Guid TransactionGuid = new Guid();
+            ListOfAddressTransactions.Add(TransactionGuid);
+            return TransactionGuid;
+        }
+        public virtual bool DeletingNFA(Guid address)
+        {
+            return false;
+        }
+        public virtual void AddingNFAInList(NonFungibleAsset NFA)
+        {
+            
+        }
+
     }
 }

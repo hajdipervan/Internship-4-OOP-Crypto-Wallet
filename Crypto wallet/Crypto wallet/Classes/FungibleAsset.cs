@@ -34,6 +34,13 @@ namespace Crypto_wallet.Classes
             if(id!=Address) return 0;
             return ValueAgainstUSD;
         }
-        
+        public double ChangeValue()
+        {
+            Random r = new Random();
+            int percentage1 = r.Next(-5, 5);
+            double percentage = (double)percentage1 / (double)2;
+            ValueAgainstUSD = ValueAgainstUSD + (percentage / 100 * ValueAgainstUSD);
+            return 0;
+        }
     }
 }

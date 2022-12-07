@@ -23,5 +23,9 @@ namespace Crypto_wallet.Classes
             ReceiversWalletAdress = receiversWalletAdress;
             Revoked= false;
         }
+        public virtual void PrintFA()
+        {
+
+        }
     }
 }
