@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Crypto_wallet.Classes
 {
-    public class NonFungibleAssetTransaction : Transaction
+    public class NonFungibleAssetTransaction : Transactions
     {
         public NonFungibleAssetTransaction(Guid addressOfAsset, Guid sentersWalletAdress, Guid receiversWalletAdress):base( addressOfAsset,  sentersWalletAdress,  receiversWalletAdress) { }
     }

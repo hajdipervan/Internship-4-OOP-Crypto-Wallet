@@ -39,10 +39,16 @@ namespace Crypto_wallet.Classes
         }
         public NonFungibleAsset FindNFA(List<NonFungibleAsset> NFAList, string address)
         {
-            foreach (var nfa in NFAList)
+            foreach (var nfa in AddressesOfNonFungibleAssets)
             {
-                if (nfa.Address.ToString() == address)
-                    return nfa;
+                if (nfa.ToString() == address)
+                {
+                    foreach (var n in NFAList)
+                    {
+                        if (n.Address == nfa)
+                            return n;
+                    }
+                }
             }
             return null;
         }

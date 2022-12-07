@@ -74,12 +74,18 @@ namespace Crypto_wallet.Classes
             }
             
         }
-        public FungibleAsset FindFA(List<FungibleAsset> FAList, string address)
+        public FungibleAsset FindFA( List<FungibleAsset> FAList,  string address)
         {
-            foreach (var fa in FAList)
+            foreach (var fa in BalanceFungibleAssets.Keys)
             {
-                if (fa.Address.ToString() == address)
-                    return fa;
+                if (fa.ToString() == address)
+                {
+                    foreach (var f in FAList)
+                    {
+                        if (fa == f.Address)
+                            return f;
+                    }
+                }
             }
             return null;
         }
